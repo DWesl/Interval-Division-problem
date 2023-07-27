@@ -21,15 +21,22 @@ int main(int argc, char *argv[]) {
   std::default_random_engine generator;
   std::uniform_int_distribution<long> distribution(0, 86'399);
   long failures = 0;
+
+  std::cout << "1.." << NUM_TESTS << std::endl;
   for (long i = 0; i < NUM_TESTS; ++i) {
     TimeInterval dividend(distribution(generator), distribution(generator), distribution(generator));
     TimeInterval divisor(distribution(generator), distribution(generator), distribution(generator));
-    if (!testRecoversDividendDivisor(dividend, divisor)) {
-      std::tuple<long, TimeInterval> result = divmod(dividend, divisor);
-      std::cout << "Test failure: " << dividend
-		<< " != " << std::get<0>(result) << " * " << divisor
-		<< " + " << std::get<1>(result) << std::endl;
+    std::tuple<long, TimeInterval> quotient_remainder = divmod(dividend, divisor);
+    bool test_passed = testRecoversDividendDivisor(dividend, divisor);
+    if (!test_passed) {
+      ++failures;
+      std::cout << "not ";
     }
+    std::cout << "ok " << i << " - " << dividend
+	      << (test_passed ? " == " : " != ")
+	      << std::get<0>(quotient_remainder) << " * " << divisor
+	      << " + " << std::get<1>(quotient_remainder) << std::endl;
   }
+
   return failures;
 }
