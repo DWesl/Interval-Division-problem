@@ -3,7 +3,7 @@
 
 #include "TimeIntervalDivMod.hh"
 
-constexpr inline long NUM_TESTS = 10;
+constexpr inline long NUM_TESTS = 200;
 
 bool testRecoversDividendDivisor(TimeInterval dividend, TimeInterval divisor) {
   std::tuple<long, TimeInterval> result = divmod(dividend, divisor);
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
       ++failures;
       std::cout << "not ";
     }
-    std::cout << "ok " << i << " - " << dividend
+    std::cout << "ok " << i+1 << " - " << dividend
 	      << (test_passed ? " == " : " != ")
 	      << std::get<0>(quotient_remainder) << " * " << divisor
 	      << " + " << std::get<1>(quotient_remainder) << std::endl;

@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -g -Wall
+CXXFLAGS = -g -Wall -Wextra
 
 all: interval_tests interval_divmod_tests
 
