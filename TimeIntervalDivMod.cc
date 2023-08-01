@@ -1,4 +1,4 @@
-#include <numeric_limits>
+#include <limits>
 #include <stdexcept>
 #include <tuple>
 
@@ -12,11 +12,13 @@ constexpr inline static long DIGIT_BASE = 10;
  * \param divisor
  */
 std::tuple<long, TimeInterval> divmod(TimeInterval dividend, TimeInterval divisor) {
-  if (divdend < TimeInterval(0, 0, 0)) {
-    return -1 * divmod(-1 * dividend, divisor);
+  if (dividend < TimeInterval(0, 0, 0)) {
+    std::tuple<long, TimeInterval> result = divmod(-1 * dividend, divisor);
+    return std::make_tuple(-1 * std::get<0>(result), -1 * std::get<1>(result));
   }
   if (divisor < TimeInterval(0, 0, 0)) {
-    return -1 * divmod(dividend, -1 * divisor);
+    std::tuple<long, TimeInterval> result = divmod(dividend, -1 * divisor);
+    return std::make_tuple(-1 * std::get<0>(result), -1 * std::get<1>(result));
   }
   if (divisor == TimeInterval(0, 0, 0)) {
     throw std::invalid_argument("Zero division error");
