@@ -1,3 +1,19 @@
+/** Check which algorithm for division is fastest.
+
+    The best way to tell which thing is fastest is to check.  This
+    does the checking, with similar wrapper code and all in a loop.
+    Optimization makes a factor of four difference in the increment
+    timings, and makes long division a factor of three faster than
+    binary search.  I could probably steal some ideas from the
+    incremental implementation to speed up the long division
+    implementation a bit more.
+
+    I should probably include something with a weird denominator,
+    since I suspect normalize() is a lot of what takes up time here.
+
+    Takes about a minute without optimization, 10s with -O3 -ffast-math
+    -march=native -flto.
+ */
 #include <functional>
 #include <iostream>
 #include <limits>
@@ -5,9 +21,12 @@
 #include <tuple>
 
 #include "TimeInterval.h"
-#include "TimeIntervalDivMod.hh"
 
 constexpr inline const static long DIGIT_BASE = 10;
+
+/** How many times to execute the O(10) tests in the timing loop.
+ */
+constexpr inline const long N_ITERATIONS = 1'000;
 
 /**
  * \brief Divides one time interval by another
@@ -173,32 +192,40 @@ int main(int argc, char *argv[]) {
     std::cout << "Function number " << i << std::endl;
     auto start_time = timer.now();
     std::function<std::tuple<long, TimeInterval>(TimeInterval, TimeInterval)> divmod = implementations[i];
-    for (long j = 0; j < 1'000; ++j) {
+    const long tests_per_loop = 7;
+    for (long j = 0; j < N_ITERATIONS; ++j) {
       std::tuple<long, TimeInterval> result;
       result = divmod(TimeInterval(1, 0, 0), TimeInterval(0, 100, 0));
       if ((std::get<0>(result) != 24 * 36) || (std::get<1>(result) != TimeInterval(0, 0, 0))) {
-	failures |= 1 << 6 * i;
+	failures |= 1 << tests_per_loop * i;
       }
       result = divmod(TimeInterval(0, 1, 0), TimeInterval(0, 0, 1'000));
       if ((std::get<0>(result) != 1'000) || (std::get<1>(result) != TimeInterval(0, 0, 0))) {
-	failures |= 2 << 6 * i;
+	failures |= 2 << tests_per_loop * i;
       }
       result = divmod(TimeInterval(1, 0, 1), TimeInterval(0, -100, 0));
       if ((std::get<0>(result) != -24 * 36) || (std::get<1>(result) != TimeInterval(0, 0, -1))) {
-	failures |= 4 << 6 * i;
+	failures |= 4 << tests_per_loop * i;
       }
 
       result = divmod(TimeInterval(1, 0, 0), TimeInterval(0, 1, 0));
       if ((std::get<0>(result) != 24 * 3600) || (std::get<1>(result) != TimeInterval(0, 0, 0))) {
-	failures |= 8 << 6 * i;
+	failures |= 8 << tests_per_loop * i;
       }
       result = divmod(TimeInterval(0, 1, 0), TimeInterval(0, 0, 1));
       if ((std::get<0>(result) != 1'000'000) || (std::get<1>(result) != TimeInterval(0, 0, 0))) {
-	failures |= 16 << 6 * i;
+	failures |= 16 << tests_per_loop * i;
       }
       result = divmod(TimeInterval(1, 0, 1), TimeInterval(0, -1, 0));
       if ((std::get<0>(result) != -24 * 3600) || (std::get<1>(result) != TimeInterval(0, 0, -1))) {
-	failures |= 32 << 6 * i;
+	failures |= 32 << tests_per_loop * i;
+      }
+
+      TimeInterval numerator(1'000L * 365L, 0, 0);
+      TimeInterval denominator(1, 2'345, 67'890);
+      result = divmod(numerator, denominator);
+      if ((std::get<0>(result) * denominator + std::get<1>(result)) != numerator) {
+	failures |= 64 << tests_per_loop * i;
       }
     }
     auto end_time = timer.now();

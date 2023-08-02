@@ -159,7 +159,6 @@ int main(int argc, char **argv)
 	TimeInterval numerator;
 	TimeInterval denominator;
 	TimeInterval remainder;
-	long quotient;
 	int num_failures = 0;
 	bool test_passed = true;
 	long test_number = 1;
