@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <random>
 
 #include "TimeInterval.h"
 
@@ -8,6 +9,7 @@ using namespace std;
 const TimeInterval ZERO(0, 0, 0);
 
 constexpr long DIGIT_BASE = 10;
+constexpr inline long NUM_RANDOM_TESTS = 50;
 
 constexpr long SECONDS_PER_HOUR = 3'600;
 constexpr long HOURS_PER_DAY = 24;
@@ -97,6 +99,34 @@ void divide(const TimeInterval &numerator,
 	//
 }
 
+bool testRecoversDividendDivisor(TimeInterval dividend, TimeInterval divisor, long test_number) {
+	long quotient;
+	TimeInterval remainder;
+	bool test_passed = true;
+	divide(dividend, divisor, quotient, remainder);
+	if (remainder > divisor) {
+	  test_passed = false;
+	}
+	TimeInterval recovered_dividend = (quotient * divisor + remainder);
+	if (recovered_dividend != dividend) {
+	  test_passed = false;
+	}
+
+	if (!test_passed) {
+	  cout << "not ";
+	}
+	cout << "ok " << test_number << " - "
+	     << dividend
+	     << (test_passed ? " == " : " != ")
+	     << quotient << " * " << divisor
+	     << " + " << remainder;
+	if (!test_passed) {
+	  cout << ": got " << recovered_dividend;
+	}
+	cout << endl;
+	return test_passed;
+}
+
 inline bool test_known_division(const TimeInterval &numerator,
 				const TimeInterval &denominator,
 				long expected_quotient,
@@ -138,7 +168,7 @@ int main(int argc, char **argv)
 	// Add tests here to verify the correctness of your implementation
 	// of interval division
 	//
-	cout << "1..7" << endl;
+	cout << "1.." << 7 + NUM_RANDOM_TESTS << endl;
 
 	numerator.setInterval(500, 0, 0);    // 500 days
 	denominator.setInterval(0, 0, 200'000);    // 0.2 seconds
@@ -218,7 +248,20 @@ int main(int argc, char **argv)
 	  ++num_failures;
 	}
 
-
+	default_random_engine generator;
+	uniform_int_distribution<long> interval_part_distribution(0, SECONDS_PER_DAY);
+	for (long i = 0; i < NUM_RANDOM_TESTS; ++i) {
+	  numerator = TimeInterval(interval_part_distribution(generator),
+				   interval_part_distribution(generator),
+				   interval_part_distribution(generator));
+	  denominator = TimeInterval(interval_part_distribution(generator),
+				     interval_part_distribution(generator),
+				     interval_part_distribution(generator));
+	  test_passed = testRecoversDividendDivisor(numerator, denominator, test_number++);
+	  if (!test_passed) {
+	    ++num_failures;
+	  }
+	}
 
 	return num_failures;
 }
