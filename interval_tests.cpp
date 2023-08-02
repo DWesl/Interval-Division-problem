@@ -102,6 +102,9 @@ int main(int argc, char **argv)
 	TimeInterval denominator;
 	TimeInterval remainder;
 	long quotient;
+	int num_failures = 0;
+	bool test_passed = true;
+	long test_number = 1;
 
 	//
 	// Add tests here to verify the correctness of your implementation
@@ -109,11 +112,64 @@ int main(int argc, char **argv)
 	//
 
 	numerator.setInterval(500, 0, 0);    // 500 days
-	denominator.setInterval(0, 0, 200000);    // 0.2 seconds
+	denominator.setInterval(0, 0, 200'000);    // 0.2 seconds
 
 	divide(numerator, denominator, quotient, remainder);
+	test_passed = (quotient != (5 * SECONDS_PER_DAY * 500)) || (remainder != ZERO);
+	cout << denominator << " divides " << numerator << " " << quotient << " times with a remainder of " << remainder << ": ";
 
-	cout << denominator << " divides " << numerator << " " << quotient << " times with a remainder of " << remainder << endl;
+	if (!test_passed) {
+	  ++num_failures;
+	  cout << "not ";
+	}
+	cout << "ok " << test_number++ << " - "
+	     << numerator << " / " << denominator
+	     << (test_passed ? " == " : " != ")
+	     << quotiend << " remainder " << remainder
+	     << endl;
 
-	return 0;
+	numerator = TimeInterval(1, 0, 0);
+	denominator = TimeInterval(0, 1, 0);
+	divide(numerator, denominator, quotient, remainder);
+	test_passed = (quotient != SECONDS_PER_DAY) || (remainder != ZERO);
+	if (!test_passed) {
+	  ++num_failures;
+	  cout << "not ";
+	}
+	cout << "ok " << test_number++ << " - "
+	     << numerator << " / " << denominator
+	     << (test_passed ? " == " : " != ")
+	     << quotiend << " remainder " << remainder
+	     << endl;
+
+	numerator = TimeInterval(0, 1, 0);
+	denominator = TimeInterval(0, 0, 1);
+	divide(numerator, denominator, quotient, remainder);
+	test_passed = (quotient != 1'000'000) || (remainder != ZERO);
+	if (!test_passed) {
+	  ++num_failures;
+	  cout << "not ";
+	}
+	cout << "ok " << test_number++ << " - "
+	     << numerator << " / " << denominator
+	     << (test_passed ? " == " : " != ")
+	     << quotiend << " remainder " << remainder
+	     << endl;
+
+	numerator = TimeInterval(1, 0, 1);
+	denominator = TimeInterval(0, -1, 0);
+	divide(numerator, denominator, quotient, remainder);
+	test_passed = (quotient != -SECONDS_PER_DAY) || (remainder != TimeInterval(0, 0, -1))
+	if (!test_passed) {
+	  ++num_failures;
+	  cout << "not ";
+	}
+	cout << "ok " << test_number++ << " - "
+	     << numerator << " / " << denominator
+	     << (test_passed ? " == " : " != ")
+	     << quotiend << " remainder " << remainder
+	     << endl;
+
+
+	return num_failures;
 }
