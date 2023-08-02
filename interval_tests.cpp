@@ -1,10 +1,13 @@
 #include <iostream>
+#include <limits>
+
 #include "TimeInterval.h"
 
 using namespace std;
 
-constexpr TimeInterval ZERO(0, 0, 0);
-constexpr inline long NUM_RANDOM_TESTS = 250;
+const TimeInterval ZERO(0, 0, 0);
+
+constexpr long DIGIT_BASE = 10;
 
 constexpr long SECONDS_PER_HOUR = 3'600;
 constexpr long HOURS_PER_DAY = 24;
@@ -25,16 +28,19 @@ void divide(const TimeInterval &numerator,
 {
 	quotient = 0;
 	remainder = numerator;
-	bool negateResult = false;
 
 	// Handle negative numerator and denominator
 	if (numerator < ZERO) {
-		negateResult = ~negateResult;
-		numerator *= -1;
+		divide(-1 * numerator, denominator, quotient, remainder);
+		quotient *= -1;
+		remainder *= -1;
+		return;
 	}
 	if (denominator < ZERO) {
-		negateResult = ~negateResult;
-		denominator *= -1;
+		divide(numerator, -1 * denominator, quotient, remainder);
+		quotient *= -1;
+		remainder *= -1;
+		return;
 	}
 	if (denominator == ZERO) {
 		throw std::invalid_argument("Zero division error");
@@ -85,16 +91,38 @@ void divide(const TimeInterval &numerator,
 	//
 	// Are there edge cases that aren't handled by the simple algorithm?
 	//
-	if (negateResult) {
-		quotient *= -1;
-		remainder *= -1;
-	}
 
 	//
 	// Are there algorithms that can arrive at the answer much more efficiently?
 	//
 }
 
+inline bool test_known_division(const TimeInterval &numerator,
+				const TimeInterval &denominator,
+				long expected_quotient,
+				const TimeInterval &expected_remainder,
+				long test_number) {
+	bool test_passed = true;
+	long actual_quotient;
+	TimeInterval actual_remainder;
+	divide(numerator, denominator, actual_quotient, actual_remainder);
+	test_passed = (actual_quotient == expected_quotient)
+	  && (actual_remainder == expected_remainder);
+
+	if (!test_passed) {
+	  cout << "not ";
+	}
+	cout << "ok " << test_number << " - "
+	     << numerator << " / " << denominator
+	     << " == "
+	     << actual_quotient << " remainder " << actual_remainder;
+	if (!test_passed) {
+	  cout << " expected " << expected_quotient
+	       << " remainder " << expected_remainder;
+	}
+	cout << endl;
+	return test_passed;
+}
 
 int main(int argc, char **argv)
 {
@@ -110,65 +138,86 @@ int main(int argc, char **argv)
 	// Add tests here to verify the correctness of your implementation
 	// of interval division
 	//
+	cout << "1..7" << endl;
 
 	numerator.setInterval(500, 0, 0);    // 500 days
 	denominator.setInterval(0, 0, 200'000);    // 0.2 seconds
 
-	divide(numerator, denominator, quotient, remainder);
-	test_passed = (quotient != (5 * SECONDS_PER_DAY * 500)) || (remainder != ZERO);
-	cout << denominator << " divides " << numerator << " " << quotient << " times with a remainder of " << remainder << ": ";
-
+	long expected_quotient = (5 * SECONDS_PER_DAY * 500);
+	TimeInterval expected_remainder = ZERO;
+	test_passed = test_known_division(numerator, denominator,
+					  expected_quotient, expected_remainder,
+					  test_number++);
 	if (!test_passed) {
 	  ++num_failures;
-	  cout << "not ";
 	}
-	cout << "ok " << test_number++ << " - "
-	     << numerator << " / " << denominator
-	     << (test_passed ? " == " : " != ")
-	     << quotiend << " remainder " << remainder
-	     << endl;
 
 	numerator = TimeInterval(1, 0, 0);
 	denominator = TimeInterval(0, 1, 0);
-	divide(numerator, denominator, quotient, remainder);
-	test_passed = (quotient != SECONDS_PER_DAY) || (remainder != ZERO);
+	expected_quotient = SECONDS_PER_DAY;
+	expected_remainder = ZERO;
+	test_passed = test_known_division(numerator, denominator,
+					  expected_quotient, expected_remainder,
+					  test_number++);
 	if (!test_passed) {
 	  ++num_failures;
-	  cout << "not ";
 	}
-	cout << "ok " << test_number++ << " - "
-	     << numerator << " / " << denominator
-	     << (test_passed ? " == " : " != ")
-	     << quotiend << " remainder " << remainder
-	     << endl;
 
 	numerator = TimeInterval(0, 1, 0);
 	denominator = TimeInterval(0, 0, 1);
-	divide(numerator, denominator, quotient, remainder);
-	test_passed = (quotient != 1'000'000) || (remainder != ZERO);
+	expected_quotient = 1'000'000;
+	expected_remainder = ZERO;
+	test_passed = test_known_division(numerator, denominator,
+					  expected_quotient, expected_remainder,
+					  test_number++);
 	if (!test_passed) {
 	  ++num_failures;
-	  cout << "not ";
 	}
-	cout << "ok " << test_number++ << " - "
-	     << numerator << " / " << denominator
-	     << (test_passed ? " == " : " != ")
-	     << quotiend << " remainder " << remainder
-	     << endl;
 
 	numerator = TimeInterval(1, 0, 1);
 	denominator = TimeInterval(0, -1, 0);
-	divide(numerator, denominator, quotient, remainder);
-	test_passed = (quotient != -SECONDS_PER_DAY) || (remainder != TimeInterval(0, 0, -1))
+	expected_quotient = -SECONDS_PER_DAY;
+	expected_remainder = TimeInterval(0, 0, -1);
+	test_passed = test_known_division(numerator, denominator,
+					  expected_quotient, expected_remainder,
+					  test_number++);
 	if (!test_passed) {
 	  ++num_failures;
-	  cout << "not ";
 	}
-	cout << "ok " << test_number++ << " - "
-	     << numerator << " / " << denominator
-	     << (test_passed ? " == " : " != ")
-	     << quotiend << " remainder " << remainder
-	     << endl;
+
+	numerator = TimeInterval(1, 0, 0);
+	denominator = TimeInterval(0, 100, 0);
+	expected_quotient = SECONDS_PER_DAY / 100;
+	expected_remainder = ZERO;
+	test_passed = test_known_division(numerator, denominator,
+					  expected_quotient, expected_remainder,
+					  test_number++);
+	if (!test_passed) {
+	  ++num_failures;
+	}
+
+	numerator = TimeInterval(0, 1, 0);
+	denominator = TimeInterval(0, 0, 1'000);
+	expected_quotient = 1'000;
+	expected_remainder = ZERO;
+	test_passed = test_known_division(numerator, denominator,
+					  expected_quotient, expected_remainder,
+					  test_number++);
+	if (!test_passed) {
+	  ++num_failures;
+	}
+
+	numerator = TimeInterval(1, 0, 1);
+	denominator = TimeInterval(0, -100, 0);
+	expected_quotient = -SECONDS_PER_DAY / 100;
+	expected_remainder = TimeInterval(0, 0, -1);
+	test_passed = test_known_division(numerator, denominator,
+					  expected_quotient, expected_remainder,
+					  test_number++);
+	if (!test_passed) {
+	  ++num_failures;
+	}
+
 
 
 	return num_failures;
