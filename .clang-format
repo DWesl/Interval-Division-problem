@@ -11,3 +11,4 @@ BraceWrapping:
 ColumnLimit: 90
 MaxEmptyLinesToKeep: 2
 BinPackParameters: false
+ReflowComments: false
