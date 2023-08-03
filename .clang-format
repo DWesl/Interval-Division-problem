@@ -1,0 +1,13 @@
+UseTab: Always
+IndentWidth: 8
+TabWidth: 8
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterFunction: true
+  BeforeElse: true
+ColumnLimit: 90
+MaxEmptyLinesToKeep: 2
+BinPackParameters: false
