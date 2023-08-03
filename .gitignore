@@ -1,0 +1,30 @@
+# Autotools-generated files
+Makefile.in
+configure
+aclocal.m4
+autom4te.cache
+config.*
+configure.scan
+
+# Automake helper scripts
+ar-lib
+compile
+depcomp
+install-sh
+missing
+test-driver
+
+# Libtool scripts
+ltmain.sh
+
+# Directories for Autotools scripts
+m4
+build-aux
+
+# Results of build process
+*.o
+*.exe
+*.log
+
+# Build directory
+build
