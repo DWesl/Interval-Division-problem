@@ -1,15 +1,23 @@
+/** \brief Implementation of floor division and a test.
+ *
+ * Not many tests at the moment, and a rather slow implementation for
+ * the division, but it's a start.
+ */
 #include <iostream>
 #include "TimeInterval.h"
 
 using namespace std;
 
-/**
- * \brief Divides one time interval by another
+/** \brief Divides one time interval by another
  *
  * Given two TimeInterval objects -- a numerator and a denominator -- computes 
  * the quotient (as a long integer) and the remainder (as another TimeInterval)
  * when numerator is divided by denominator.
  *
+ * \param[in] numerator
+ * \param[in] denominator
+ * \param[out] quotient
+ * \param[out] remainder
  */
 void divide(const TimeInterval &numerator,
             const TimeInterval &denominator,

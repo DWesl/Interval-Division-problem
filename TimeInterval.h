@@ -4,9 +4,9 @@
  * \brief Storage and manipulation of time intervals
  *
  * This class stores time intervals that may be as long as 10^16 years
- * (when sizeof(long) == 8) while having microsecond resolution.
- * Basic arithmetic for these intervals is supported for the following
- * operations:
+ * (when sizeof(long) == 8; 10^6 when sizeof(long) == 4) while having
+ * microsecond resolution.  Basic arithmetic for these intervals is
+ * supported for the following operations:
  *     - addition
  *     - subtraction
  *     - multiplication of an interval by an integer
@@ -55,7 +55,7 @@ public:
 	~TimeInterval();
 
 	//
-	// Set an interval to a specified length of time
+	/// Set an interval to a specified length of time
 	//
 	void setInterval(long days, long seconds, long u_seconds);
 
